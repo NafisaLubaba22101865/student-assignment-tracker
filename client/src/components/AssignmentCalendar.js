@@ -30,7 +30,7 @@ function AssignmentCalendar({ assignments }) {
   }));
 
   return (
-    <div style={{ height: '350px', marginTop: '40px', maxWidth: '900px', margin: '40px auto' }}>
+    <div style={{ height: '300px', marginTop: '50px', maxWidth: '700px', margin: '40px auto' }}>
       <h2 style={{ textAlign: 'center', marginBottom: '10px' }}>📅 Assignment Calendar</h2>
       <Calendar
         localizer={localizer}

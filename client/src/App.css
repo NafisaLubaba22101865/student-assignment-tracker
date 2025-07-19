@@ -14,15 +14,16 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  background: linear-gradient(135deg, #a18cd1, #fbc2eb); /* dreamy gradient */
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: #ffffff; /* or #333333 if your background is light */
 }
+
 
 .App-link {
   color: #61dafb;

@@ -14,11 +14,11 @@ function App() {
   const [darkMode, setDarkMode] = useState(false);
 
   const theme = {
-    background: darkMode ? '#121212' : '#f4f4f4',
+    background: darkMode ? '#121212' : '#989dbc',
     color: darkMode ? '#ffffff' : '#000000',
     cardBackground: darkMode ? '#1e1e1e' : '#ffffff',
     buttonBg: darkMode ? '#bb86fc' : '#6e569c',
-    buttonHover: darkMode ? '#9b6ce9' : '#ddd0d0',
+    buttonHover: darkMode ? '#9b6ce9' : '#9e5555',
     cardShadow: darkMode ? '0 4px 8px rgba(0,0,0,0.5)' : '0 4px 8px rgba(0,0,0,0.1)',
   };
 
@@ -92,7 +92,7 @@ function App() {
               fontWeight: 'bold',
               transition: '0.3s',
             }}
-            onMouseOver={(e) => (e.target.style.backgroundColor = '#45a045')}
+            onMouseOver={(e) => (e.target.style.backgroundColor = '#5cac5c')}
             onMouseOut={(e) => (e.target.style.backgroundColor = '#4caf50')}
           >
             Enable Notifications 🔔
