@@ -29,6 +29,69 @@ mongoose
 app.get('/', (req, res) => {
   res.send('📡 Hello from Student Assignment Tracker backend!');
 });
+const Assignment = require('./models/Assignment');
+
+// Get all assignments
+app.get('/api/assignments', async (req, res) => {
+  try {
+    const assignments = await Assignment.find();
+    res.json(assignments);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get assignment by ID
+app.get('/api/assignments/:id', async (req, res) => {
+  try {
+    const assignment = await Assignment.findById(req.params.id);
+    if (!assignment) return res.status(404).json({ message: 'Assignment not found' });
+    res.json(assignment);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Create new assignment
+app.post('/api/assignments', async (req, res) => {
+  const assignment = new Assignment({
+    title: req.body.title,
+    dueDate: req.body.dueDate,
+    content: req.body.content || '',
+    status: req.body.status || 'Not Started'
+  });
+  try {
+    const newAssignment = await assignment.save();
+    res.status(201).json(newAssignment);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// Submit assignment content (update content)
+app.post('/api/assignments/:id/submit', async (req, res) => {
+  try {
+    const assignment = await Assignment.findById(req.params.id);
+    if (!assignment) return res.status(404).json({ message: 'Assignment not found' });
+
+    assignment.content = req.body.content || assignment.content;
+    await assignment.save();
+    res.json({ message: 'Assignment submitted' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Delete assignment
+app.delete('/api/assignments/:id', async (req, res) => {
+  try {
+    const assignment = await Assignment.findByIdAndDelete(req.params.id);
+    if (!assignment) return res.status(404).json({ message: 'Assignment not found' });
+    res.json({ message: 'Assignment deleted' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 // Start server
 app.listen(PORT, () => {

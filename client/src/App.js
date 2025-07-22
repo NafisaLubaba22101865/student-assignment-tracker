@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import AddAssignmentForm from './components/AddAssignmentForm';
 import AssignmentCard from './components/AssignmentCard';
 import { askNotificationPermission, notifyIfDueTomorrow } from './components/NotificationHelper';
 import AssignmentCalendar from './components/AssignmentCalendar';
+import WriteAssignmentPage from './components/WriteAssignmentPage';
 
-function App() {
+
+function HomePage() {
   const [assignments, setAssignments] = useState([]);
   const [editAssignment, setEditAssignment] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
-  const [showCalendar, setShowCalendar] = useState(false); // toggle calendar view
+  const [showCalendar, setShowCalendar] = useState(false);
 
   const theme = {
     background: darkMode ? '#121212' : '#989dbc',
@@ -19,17 +22,14 @@ function App() {
     cardShadow: darkMode ? '0 4px 8px rgba(0,0,0,0.5)' : '0 4px 8px rgba(0,0,0,0.1)',
   };
 
-  // Notification permission on load
   useEffect(() => {
     askNotificationPermission();
   }, []);
 
-  // Notify if any assignments due tomorrow
   useEffect(() => {
     notifyIfDueTomorrow(assignments);
   }, [assignments]);
 
-  // Add new assignment
   const addAssignment = (title, dueDate) => {
     const newAssignment = {
       id: Date.now(),
@@ -40,30 +40,25 @@ function App() {
     setAssignments([...assignments, newAssignment]);
   };
 
-  // Delete assignment
   const deleteAssignment = (id) => {
     if (window.confirm('Are you sure you want to delete this assignment?')) {
       setAssignments(assignments.filter((a) => a.id !== id));
     }
   };
 
-  // Start editing an assignment
   const startEditAssignment = (assignment) => {
     setEditAssignment(assignment);
   };
 
-  // Save edited assignment
   const saveEditedAssignment = (updated) => {
     setAssignments(assignments.map((a) => (a.id === updated.id ? updated : a)));
     setEditAssignment(null);
   };
 
-  // Cancel editing
   const cancelEdit = () => {
     setEditAssignment(null);
   };
 
-  // Update status of an assignment
   const updateStatus = (id, newStatus) => {
     setAssignments((prev) =>
       prev.map((a) => (a.id === id ? { ...a, status: newStatus } : a))
@@ -83,7 +78,6 @@ function App() {
         <h1>📘 Student Assignment Tracker</h1>
 
         <div style={{ display: 'flex', gap: '12px' }}>
-          {/* Toggle calendar button */}
           <button
             onClick={() => setShowCalendar(!showCalendar)}
             style={{
@@ -102,7 +96,6 @@ function App() {
             Assignment Calendar
           </button>
 
-          {/* Enable Notifications button */}
           <button
             onClick={askNotificationPermission}
             style={{
@@ -121,7 +114,6 @@ function App() {
             Enable Notifications 🔔
           </button>
 
-          {/* Dark mode toggle button */}
           <button
             onClick={() => setDarkMode(!darkMode)}
             style={{
@@ -141,7 +133,6 @@ function App() {
         </div>
       </div>
 
-      {/* Conditionally render calendar or assignments list */}
       {showCalendar ? (
         <AssignmentCalendar assignments={assignments} />
       ) : (
@@ -172,6 +163,18 @@ function App() {
         </>
       )}
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/write/:id" element={<WriteAssignmentPage />} />
+
+      </Routes>
+    </Router>
   );
 }
 

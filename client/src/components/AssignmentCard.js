@@ -1,7 +1,10 @@
 // src/components/AssignmentCard.js
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function AssignmentCard({ assignment, startEditAssignment, deleteAssignment, darkMode, theme, updateStatus }) {
+  const navigate = useNavigate(); // ✅ Correctly placed inside the component
+
   const handleStatusChange = (e) => {
     updateStatus(assignment.id, e.target.value);
   };
@@ -71,6 +74,21 @@ function AssignmentCard({ assignment, startEditAssignment, deleteAssignment, dar
           }}
         >
           Delete
+        </button>
+
+        <button
+          onClick={() => navigate(`/write/${assignment.id}`)}
+          style={{
+            backgroundColor: '#4caf50',
+            border: 'none',
+            color: 'white',
+            padding: '8px 12px',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+          }}
+        >
+          Write
         </button>
       </div>
     </div>
