@@ -1,8 +1,12 @@
 {
   "dependencies": {
+    "@fullcalendar/daygrid": "^6.1.18",
+    "@fullcalendar/interaction": "^6.1.18",
+    "@fullcalendar/react": "^6.1.18",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.0",
     "express": "^5.1.0",
+    "mongoose": "^8.16.4",
     "openai": "^5.10.1",
     "react-big-calendar": "^1.19.4"
   }

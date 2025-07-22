@@ -12,19 +12,17 @@
     animation: App-logo-spin infinite 20s linear;
   }
 }
-/
 
 .App-header {
-  background: linear-gradient(135deg, #a18cd1, #fbc2eb); /* dreamy gradient */
+  background-color: #282c34;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: #ffffff; /* or #333333 if your background is light */
+  color: white;
 }
-
 
 .App-link {
   color: #61dafb;

@@ -1,52 +1,47 @@
-// src/components/AssignmentCalendar.js
 import React from 'react';
-import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
-
-import format from 'date-fns/format';
-import parse from 'date-fns/parse';
-import startOfWeek from 'date-fns/startOfWeek';
-import getDay from 'date-fns/getDay';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
-
-
-const locales = {
-  'en-US': require('date-fns/locale/en-US'),
-};
-
-const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }),
-  getDay,
-  locales,
-});
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin from '@fullcalendar/interaction';
 
 function AssignmentCalendar({ assignments }) {
+  // Map assignments to FullCalendar event objects
   const events = assignments.map((a) => ({
-    title: a.title + ` (${a.status})`,
-    start: new Date(a.dueDate),
-    end: new Date(a.dueDate),
+    title: `${a.title} (${a.status})`,
+    start: a.dueDate,
     allDay: true,
+    backgroundColor:
+      a.status === 'Completed' ? '#4caf50' :
+      a.status === 'In Progress' ? '#ff9800' :
+      a.status === 'Not Started' ? '#f44336' :
+      '#2196f3',
+    borderColor: 'transparent',
   }));
 
   return (
-    <div style={{ height: '300px', marginTop: '50px', maxWidth: '700px', margin: '40px auto' }}>
-      <h2 style={{ textAlign: 'center', marginBottom: '10px' }}>📅 Assignment Calendar</h2>
-      <Calendar
-        localizer={localizer}
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        style={{ height: 300, maxWidth: '900px', margin: '0 auto' }}
-        eventPropGetter={(event) => {
-          let bgColor = '#2196f3';
-          if (event.title.includes('Completed')) bgColor = '#4caf50';
-          else if (event.title.includes('In Progress')) bgColor = '#ff9800';
-          else if (event.title.includes('Not Started')) bgColor = '#f44336';
-          return { style: { backgroundColor: bgColor, color: 'white', borderRadius: '6px' } };
-        }}
-      />
-    </div>
+    <>
+      { }
+      <style>{`
+        .fc-col-header-cell-cushion {
+          color: #002aff !important;
+          font-weight: bold !important;
+        }
+      `}</style>
+
+      <div style={{ maxWidth: '1000px', margin: '40px auto' }}>
+        <h2 style={{ textAlign: 'center', marginBottom: '10px' }}>📅 Assignment Calendar</h2>
+        <FullCalendar
+          plugins={[dayGridPlugin, interactionPlugin]}
+          initialView="dayGridMonth"
+          events={events}
+          headerToolbar={{
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,dayGridWeek,dayGridDay'
+          }}
+          height="auto"
+        />
+      </div>
+    </>
   );
 }
 
