@@ -8,12 +8,14 @@ const dotenv = require('dotenv');
 dotenv.config();
 console.log('🔍 MONGODB_URI:', process.env.MONGODB_URI);
 
-
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3006',  // change this to your frontend origin
+  credentials: true
+}));
 app.use(express.json()); // Parse JSON bodies
 
 // Connect to MongoDB
@@ -29,6 +31,7 @@ mongoose
 app.get('/', (req, res) => {
   res.send('📡 Hello from Student Assignment Tracker backend!');
 });
+
 const Assignment = require('./models/Assignment');
 
 // Get all assignments
@@ -41,13 +44,21 @@ app.get('/api/assignments', async (req, res) => {
   }
 });
 
-// Get assignment by ID
+// Get assignment by ID with ObjectId validation
 app.get('/api/assignments/:id', async (req, res) => {
+  const id = req.params.id;
+
+  // Validate MongoDB ObjectId format
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Invalid assignment ID format' });
+  }
+
   try {
-    const assignment = await Assignment.findById(req.params.id);
+    const assignment = await Assignment.findById(id);
     if (!assignment) return res.status(404).json({ message: 'Assignment not found' });
     res.json(assignment);
   } catch (err) {
+    console.error('Error fetching assignment:', err);
     res.status(500).json({ message: err.message });
   }
 });
@@ -70,8 +81,14 @@ app.post('/api/assignments', async (req, res) => {
 
 // Submit assignment content (update content)
 app.post('/api/assignments/:id/submit', async (req, res) => {
+  const id = req.params.id;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Invalid assignment ID format' });
+  }
+
   try {
-    const assignment = await Assignment.findById(req.params.id);
+    const assignment = await Assignment.findById(id);
     if (!assignment) return res.status(404).json({ message: 'Assignment not found' });
 
     assignment.content = req.body.content || assignment.content;
@@ -84,8 +101,14 @@ app.post('/api/assignments/:id/submit', async (req, res) => {
 
 // Delete assignment
 app.delete('/api/assignments/:id', async (req, res) => {
+  const id = req.params.id;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Invalid assignment ID format' });
+  }
+
   try {
-    const assignment = await Assignment.findByIdAndDelete(req.params.id);
+    const assignment = await Assignment.findByIdAndDelete(id);
     if (!assignment) return res.status(404).json({ message: 'Assignment not found' });
     res.json({ message: 'Assignment deleted' });
   } catch (err) {
