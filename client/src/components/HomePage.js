@@ -17,7 +17,7 @@ function HomePage() {
     fetchAssignments();
   }, []);
 
-  // Add a new assignment (POST request)
+  // Add a new assignment
   const addAssignment = (title, dueDate) => {
     fetch('http://localhost:5000/api/assignments', {
       method: 'POST',
@@ -31,28 +31,27 @@ function HomePage() {
       .catch(err => console.error('Error adding assignment:', err));
   };
 
-  // Prepare assignment for editing
+  // Edit preparation
   const startEditAssignment = (assignment) => {
     setEditAssignment(assignment);
   };
 
-  // Save edited assignment (PUT or POST depending on your backend)
+  // Save edited assignment
   const saveEditedAssignment = (updatedAssignment) => {
-    fetch(`http://localhost:5000/api/assignments/${updatedAssignment._id}`, {
-      method: 'PUT', // or 'POST' if your backend uses POST to update
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updatedAssignment),
+  fetch(`http://localhost:5000/api/assignments/${updatedAssignment._id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updatedAssignment),
+  })
+    .then(res => res.json())
+    .then((updatedFromServer) => {
+      setAssignments(prev =>
+        prev.map(a => (a._id === updatedFromServer._id ? updatedFromServer : a))
+      );
+      setEditAssignment(null);
     })
-      .then(res => res.json())
-      .then(() => {
-        // Update locally
-        setAssignments(prev =>
-          prev.map(a => (a._id === updatedAssignment._id ? updatedAssignment : a))
-        );
-        setEditAssignment(null);
-      })
-      .catch(err => console.error('Error updating assignment:', err));
-  };
+    .catch(err => console.error('Error updating assignment:', err));
+};
 
   // Cancel editing
   const cancelEdit = () => {
@@ -69,6 +68,22 @@ function HomePage() {
         setAssignments(prev => prev.filter(a => a._id !== id));
       })
       .catch(err => console.error('Error deleting assignment:', err));
+  };
+
+  // ✅ Handle status change
+  const handleStatusChange = (id, newStatus) => {
+    fetch(`http://localhost:5000/api/assignments/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus }),
+    })
+      .then(res => res.json())
+      .then(() => {
+        setAssignments(prev =>
+          prev.map(a => (a._id === id ? { ...a, status: newStatus } : a))
+        );
+      })
+      .catch(err => console.error('Error updating status:', err));
   };
 
   return (
@@ -101,13 +116,29 @@ function HomePage() {
               padding: 15,
               borderRadius: 8,
               display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
+              flexDirection: 'column',
+              gap: '10px',
             }}
           >
             <div>
-              <strong>{assignment.title}</strong> — Due: {new Date(assignment.dueDate).toLocaleDateString()}
+              <strong>{assignment.title}</strong> — Due:{' '}
+              {new Date(assignment.dueDate).toLocaleDateString()}
             </div>
+
+            <div>
+              <label>Status: </label>
+              <select
+                value={assignment.status || 'Not Started'}
+                onChange={(e) =>
+                  handleStatusChange(assignment._id, e.target.value)
+                }
+              >
+                <option value="Not Started">Not Started</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+
             <div>
               <button
                 onClick={() => startEditAssignment(assignment)}

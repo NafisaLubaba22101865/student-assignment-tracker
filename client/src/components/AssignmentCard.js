@@ -1,12 +1,11 @@
-// src/components/AssignmentCard.js
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function AssignmentCard({ assignment, startEditAssignment, deleteAssignment, darkMode, theme, updateStatus }) {
-  const navigate = useNavigate(); // ✅ Correctly placed inside the component
+  const navigate = useNavigate(); // ✅ React Router hook to navigate
 
   const handleStatusChange = (e) => {
-    updateStatus(assignment.id, e.target.value);
+    updateStatus(assignment._id, e.target.value); // ✅ Use _id for MongoDB
   };
 
   return (
@@ -24,12 +23,14 @@ function AssignmentCard({ assignment, startEditAssignment, deleteAssignment, dar
     >
       <div>
         <strong style={{ fontSize: '18px' }}>{assignment.title}</strong><br />
-        <span style={{ color: darkMode ? '#aaa' : '#777' }}>Due: {assignment.dueDate}</span><br />
+        <span style={{ color: darkMode ? '#aaa' : '#777' }}>
+          Due: {new Date(assignment.dueDate).toLocaleDateString()}
+        </span><br />
         <span style={{ fontWeight: 'bold', color: '#4caf50' }}>{assignment.status}</span>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        {/* Status dropdown */}
+        {/* ✅ Status dropdown */}
         <select
           value={assignment.status}
           onChange={handleStatusChange}
@@ -46,6 +47,7 @@ function AssignmentCard({ assignment, startEditAssignment, deleteAssignment, dar
           <option value="Completed">Completed</option>
         </select>
 
+        {/* ✅ Edit button */}
         <button
           onClick={() => startEditAssignment(assignment)}
           style={{
@@ -61,8 +63,9 @@ function AssignmentCard({ assignment, startEditAssignment, deleteAssignment, dar
           Edit
         </button>
 
+        {/* ✅ Delete button */}
         <button
-          onClick={() => deleteAssignment(assignment.id)}
+          onClick={() => deleteAssignment(assignment._id)}
           style={{
             backgroundColor: '#e53935',
             border: 'none',
@@ -76,8 +79,9 @@ function AssignmentCard({ assignment, startEditAssignment, deleteAssignment, dar
           Delete
         </button>
 
+        {/* ✅ Write page navigation */}
         <button
-          onClick={() => navigate(`/write/${assignment.id}`)}
+          onClick={() => navigate(`/write/${assignment._id}`)}
           style={{
             backgroundColor: '#4caf50',
             border: 'none',
