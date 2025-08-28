@@ -40,6 +40,22 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+// ✅ PUT update grade only
+router.put('/:id/grade', async (req, res) => {
+  try {
+    const { grade } = req.body;
+    const updated = await Assignment.findByIdAndUpdate(
+      req.params.id,
+      { grade },
+      { new: true }
+    );
+    if (!updated) return res.status(404).json({ message: 'Assignment not found' });
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // DELETE assignment by id
 router.delete('/:id', async (req, res) => {
   try {

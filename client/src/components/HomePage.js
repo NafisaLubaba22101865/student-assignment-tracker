@@ -5,12 +5,16 @@ function HomePage() {
   const [assignments, setAssignments] = useState([]);
   const [editAssignment, setEditAssignment] = useState(null);
 
-  // Fetch assignments from backend
-  const fetchAssignments = () => {
-    fetch('http://localhost:5000/api/assignments')
-      .then(res => res.json())
-      .then(data => setAssignments(data))
-      .catch(err => console.error('Error fetching assignments:', err));
+  // Fetch all assignments from backend
+  const fetchAssignments = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/assignments');
+      const data = await res.json();
+      setAssignments(data);
+      console.log('Assignments fetched:', data); // ✅ debug
+    } catch (err) {
+      console.error('Error fetching assignments:', err);
+    }
   };
 
   useEffect(() => {
@@ -18,72 +22,87 @@ function HomePage() {
   }, []);
 
   // Add a new assignment
-  const addAssignment = (title, dueDate) => {
-    fetch('http://localhost:5000/api/assignments', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, dueDate }),
-    })
-      .then(res => res.json())
-      .then(newAssignment => {
-        setAssignments(prev => [...prev, newAssignment]);
-      })
-      .catch(err => console.error('Error adding assignment:', err));
+  const addAssignment = async (title, dueDate) => {
+    try {
+      const res = await fetch('http://localhost:5000/api/assignments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, dueDate })
+      });
+      const newAssignment = await res.json();
+      setAssignments(prev => [...prev, newAssignment]);
+    } catch (err) {
+      console.error('Error adding assignment:', err);
+    }
   };
 
-  // Edit preparation
+  // Start editing
   const startEditAssignment = (assignment) => {
     setEditAssignment(assignment);
   };
 
   // Save edited assignment
-  const saveEditedAssignment = (updatedAssignment) => {
-  fetch(`http://localhost:5000/api/assignments/${updatedAssignment._id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(updatedAssignment),
-  })
-    .then(res => res.json())
-    .then((updatedFromServer) => {
+  const saveEditedAssignment = async (updatedAssignment) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/assignments/${updatedAssignment._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedAssignment)
+      });
+      const updatedFromServer = await res.json();
       setAssignments(prev =>
-        prev.map(a => (a._id === updatedFromServer._id ? updatedFromServer : a))
+        prev.map(a => a._id === updatedFromServer._id ? updatedFromServer : a)
       );
       setEditAssignment(null);
-    })
-    .catch(err => console.error('Error updating assignment:', err));
-};
-
-  // Cancel editing
-  const cancelEdit = () => {
-    setEditAssignment(null);
+    } catch (err) {
+      console.error('Error updating assignment:', err);
+    }
   };
+
+  // Cancel edit
+  const cancelEdit = () => setEditAssignment(null);
 
   // Delete assignment
-  const deleteAssignment = (id) => {
-    fetch(`http://localhost:5000/api/assignments/${id}`, {
-      method: 'DELETE',
-    })
-      .then(res => res.json())
-      .then(() => {
-        setAssignments(prev => prev.filter(a => a._id !== id));
-      })
-      .catch(err => console.error('Error deleting assignment:', err));
+  const deleteAssignment = async (id) => {
+    try {
+      await fetch(`http://localhost:5000/api/assignments/${id}`, { method: 'DELETE' });
+      setAssignments(prev => prev.filter(a => a._id !== id));
+    } catch (err) {
+      console.error('Error deleting assignment:', err);
+    }
   };
 
-  // ✅ Handle status change
-  const handleStatusChange = (id, newStatus) => {
-    fetch(`http://localhost:5000/api/assignments/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: newStatus }),
-    })
-      .then(res => res.json())
-      .then(() => {
-        setAssignments(prev =>
-          prev.map(a => (a._id === id ? { ...a, status: newStatus } : a))
-        );
-      })
-      .catch(err => console.error('Error updating status:', err));
+  // Update status
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      await fetch(`http://localhost:5000/api/assignments/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      setAssignments(prev =>
+        prev.map(a => a._id === id ? { ...a, status: newStatus } : a)
+      );
+    } catch (err) {
+      console.error('Error updating status:', err);
+    }
+  };
+
+  // Update grade
+  const handleGradeUpdate = async (id, grade) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/assignments/${id}/grade`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ grade: Number(grade) })
+      });
+      const updatedAssignment = await res.json();
+      setAssignments(prev =>
+        prev.map(a => a._id === id ? updatedAssignment : a)
+      );
+    } catch (err) {
+      console.error('Error updating grade:', err);
+    }
   };
 
   return (
@@ -107,9 +126,9 @@ function HomePage() {
       {assignments.length === 0 ? (
         <p>No assignments found. Add one above!</p>
       ) : (
-        assignments.map(assignment => (
+        assignments.map(a => (
           <div
-            key={assignment._id}
+            key={a._id}
             style={{
               backgroundColor: '#eee',
               marginBottom: 10,
@@ -121,33 +140,33 @@ function HomePage() {
             }}
           >
             <div>
-              <strong>{assignment.title}</strong> — Due:{' '}
-              {new Date(assignment.dueDate).toLocaleDateString()}
+              <strong>{a.title}</strong> <br />
+              Due: {new Date(a.dueDate).toLocaleDateString()} <br />
+              Status: {a.status} <br />
+              Grade: {a.grade !== null ? a.grade : 'Not graded yet'} {/* ✅ show grade */}
             </div>
 
-            <div>
-              <label>Status: </label>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
               <select
-                value={assignment.status || 'Not Started'}
-                onChange={(e) =>
-                  handleStatusChange(assignment._id, e.target.value)
-                }
+                value={a.status || 'Not Started'}
+                onChange={(e) => handleStatusChange(a._id, e.target.value)}
               >
                 <option value="Not Started">Not Started</option>
                 <option value="In Progress">In Progress</option>
                 <option value="Completed">Completed</option>
               </select>
-            </div>
 
-            <div>
+              <input
+                type="number"
+                placeholder="Enter grade"
+                value={a.grade || ''}
+                onChange={(e) => handleGradeUpdate(a._id, e.target.value)}
+                style={{ width: '80px' }}
+              />
+
+              <button onClick={() => startEditAssignment(a)}>Edit</button>
               <button
-                onClick={() => startEditAssignment(assignment)}
-                style={{ marginRight: 10 }}
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => deleteAssignment(assignment._id)}
+                onClick={() => deleteAssignment(a._id)}
                 style={{ backgroundColor: 'red', color: 'white' }}
               >
                 Delete

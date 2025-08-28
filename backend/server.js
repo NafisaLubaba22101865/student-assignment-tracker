@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:3006',  // change this to your frontend origin
+  origin: 'http://localhost:3000',  // React default port
   credentials: true
 }));
 app.use(express.json()); // Parse JSON bodies
@@ -113,6 +113,84 @@ app.delete('/api/assignments/:id', async (req, res) => {
     res.json({ message: 'Assignment deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+});
+
+// Add study time session
+app.post('/api/assignments/:id/study-time', async (req, res) => {
+  const id = req.params.id;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Invalid assignment ID format' });
+  }
+
+  try {
+    const assignment = await Assignment.findById(id);
+    if (!assignment) return res.status(404).json({ message: 'Assignment not found' });
+
+    const { hours, notes } = req.body;
+    
+    if (!hours || hours <= 0) {
+      return res.status(400).json({ message: 'Hours must be greater than 0' });
+    }
+
+    // Add new study session
+    assignment.studyTime.sessions.push({
+      date: new Date(),
+      hours: hours,
+      notes: notes || ''
+    });
+
+    // Update total hours
+    assignment.studyTime.totalHours += hours;
+
+    await assignment.save();
+    res.json(assignment);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Get study time for an assignment
+app.get('/api/assignments/:id/study-time', async (req, res) => {
+  const id = req.params.id;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Invalid assignment ID format' });
+  }
+
+  try {
+    const assignment = await Assignment.findById(id);
+    if (!assignment) return res.status(404).json({ message: 'Assignment not found' });
+    
+    res.json({
+      totalHours: assignment.studyTime.totalHours,
+      sessions: assignment.studyTime.sessions
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Update assignment (PUT method for editing)
+app.put('/api/assignments/:id', async (req, res) => {
+  const id = req.params.id;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Invalid assignment ID format' });
+  }
+
+  try {
+    const assignment = await Assignment.findByIdAndUpdate(
+      id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+    
+    if (!assignment) return res.status(404).json({ message: 'Assignment not found' });
+    res.json(assignment);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
   }
 });
 

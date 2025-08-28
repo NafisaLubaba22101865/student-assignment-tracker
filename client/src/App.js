@@ -5,20 +5,43 @@ import AssignmentCard from './components/AssignmentCard';
 import { askNotificationPermission, notifyIfDueTomorrow } from './components/NotificationHelper';
 import AssignmentCalendar from './components/AssignmentCalendar';
 import WriteAssignmentPage from './components/WriteAssignmentPage';
+import StudyTimeDashboard from './components/StudyTimeDashboard';
+import ThemeManager from './components/ThemeManager';
+import AssignmentStats from './components/AssignmentStats';
+import GradeTracker from './components/GradeTracker';
 
 function HomePage() {
   const [assignments, setAssignments] = useState([]);
   const [editAssignment, setEditAssignment] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [showThemeManager, setShowThemeManager] = useState(false);
+  const [showStats, setShowStats] = useState(false);
+  const [showGradeTracker, setShowGradeTracker] = useState(false);
 
-  const theme = {
-    background: darkMode ? '#121212' : '#989dbc',
-    color: darkMode ? '#ffffff' : '#000000',
-    cardBackground: darkMode ? '#1e1e1e' : '#ffffff',
-    buttonBg: darkMode ? '#bb86fc' : '#6e569c',
-    buttonHover: darkMode ? '#9b6ce9' : '#9e5555',
-    cardShadow: darkMode ? '0 4px 8px rgba(0,0,0,0.5)' : '0 4px 8px rgba(0,0,0,0.1)',
+  // Load theme from localStorage or use default
+  const [theme, setTheme] = useState(() => {
+    const savedTheme = localStorage.getItem('assignment-tracker-theme');
+    if (savedTheme) {
+      return JSON.parse(savedTheme);
+    }
+    return {
+      background: darkMode ? '#121212' : '#989dbc',
+      color: darkMode ? '#ffffff' : '#000000',
+      cardBackground: darkMode ? '#1e1e1e' : '#ffffff',
+      buttonBg: darkMode ? '#bb86fc' : '#6e569c',
+      buttonHover: darkMode ? '#9b6ce9' : '#9e5555',
+      cardShadow: darkMode ? '0 4px 8px rgba(0,0,0,0.5)' : '0 4px 8px rgba(0,0,0,0.1)',
+    };
+  });
+
+  // Save theme to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('assignment-tracker-theme', JSON.stringify(theme));
+  }, [theme]);
+
+  const handleThemeChange = (newTheme) => {
+    setTheme(newTheme);
   };
 
   // Fetch assignments from backend
@@ -116,16 +139,70 @@ function HomePage() {
               padding: '8px 16px',
               borderRadius: 8,
               border: 'none',
-              backgroundColor: '#3d5faf',
+              backgroundColor: theme.buttonBg,
               color: 'white',
               cursor: 'pointer',
               fontWeight: 'bold',
               transition: '0.3s',
             }}
-            onMouseOver={(e) => (e.target.style.backgroundColor = '#5cac5c')}
-            onMouseOut={(e) => (e.target.style.backgroundColor = '#4caf50')}
+            onMouseOver={(e) => (e.target.style.backgroundColor = theme.buttonHover)}
+            onMouseOut={(e) => (e.target.style.backgroundColor = theme.buttonBg)}
           >
-            Assignment Calendar
+            📅 Calendar
+          </button>
+
+          <button
+            onClick={() => setShowThemeManager(!showThemeManager)}
+            style={{
+              padding: '8px 16px',
+              borderRadius: 8,
+              border: 'none',
+              backgroundColor: theme.buttonBg,
+              color: 'white',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              transition: '0.3s',
+            }}
+            onMouseOver={(e) => (e.target.style.backgroundColor = theme.buttonHover)}
+            onMouseOut={(e) => (e.target.style.backgroundColor = theme.buttonBg)}
+          >
+            🎨 Themes
+          </button>
+
+          <button
+            onClick={() => setShowStats(!showStats)}
+            style={{
+              padding: '8px 16px',
+              borderRadius: 8,
+              border: 'none',
+              backgroundColor: theme.buttonBg,
+              color: 'white',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              transition: '0.3s',
+            }}
+            onMouseOver={(e) => (e.target.style.backgroundColor = theme.buttonHover)}
+            onMouseOut={(e) => (e.target.style.backgroundColor = theme.buttonBg)}
+          >
+            📊 Stats
+          </button>
+
+          <button
+            onClick={() => setShowGradeTracker(!showGradeTracker)}
+            style={{
+              padding: '8px 16px',
+              borderRadius: 8,
+              border: 'none',
+              backgroundColor: theme.buttonBg,
+              color: 'white',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              transition: '0.3s',
+            }}
+            onMouseOver={(e) => (e.target.style.backgroundColor = theme.buttonHover)}
+            onMouseOut={(e) => (e.target.style.backgroundColor = theme.buttonBg)}
+          >
+            📝 Grades
           </button>
 
           <button
@@ -134,41 +211,42 @@ function HomePage() {
               padding: '8px 16px',
               borderRadius: 8,
               border: 'none',
-              backgroundColor: '#3d5faf',
+              backgroundColor: theme.buttonBg,
               color: 'white',
               cursor: 'pointer',
               fontWeight: 'bold',
               transition: '0.3s',
             }}
-            onMouseOver={(e) => (e.target.style.backgroundColor = '#5cac5c')}
-            onMouseOut={(e) => (e.target.style.backgroundColor = '#4caf50')}
-          >
-            Enable Notifications 🔔
-          </button>
-
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            style={{
-              padding: '8px 16px',
-              borderRadius: 9,
-              border: 'none',
-              backgroundColor: theme.buttonBg,
-              color: '#fff',
-              cursor: 'pointer',
-              transition: '0.3s',
-            }}
             onMouseOver={(e) => (e.target.style.backgroundColor = theme.buttonHover)}
             onMouseOut={(e) => (e.target.style.backgroundColor = theme.buttonBg)}
           >
-            {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
+            🔔 Notifications
           </button>
         </div>
       </div>
 
       {showCalendar ? (
         <AssignmentCalendar assignments={assignments} />
+      ) : showThemeManager ? (
+        <ThemeManager currentTheme={theme} onThemeChange={handleThemeChange} />
+      ) : showStats ? (
+        <AssignmentStats assignments={assignments} theme={theme} />
+      ) : showGradeTracker ? (
+        <GradeTracker 
+          assignments={assignments} 
+          onAssignmentUpdate={(updatedAssignment) => {
+            setAssignments(prev =>
+              prev.map(assignment => 
+                assignment._id === updatedAssignment._id ? updatedAssignment : assignment
+              )
+            );
+          }}
+          theme={theme} 
+        />
       ) : (
         <>
+          <StudyTimeDashboard assignments={assignments} theme={theme} />
+          
           <AddAssignmentForm
             addAssignment={addAssignment}
             editAssignment={editAssignment}
@@ -189,6 +267,13 @@ function HomePage() {
                 darkMode={darkMode}
                 theme={theme}
                 updateStatus={updateStatus}
+                onAssignmentUpdate={(updatedAssignment) => {
+                  setAssignments(prev =>
+                    prev.map(assignment => 
+                      assignment._id === updatedAssignment._id ? updatedAssignment : assignment
+                    )
+                  );
+                }}
               />
             ))
           )}

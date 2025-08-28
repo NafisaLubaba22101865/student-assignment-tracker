@@ -16,8 +16,36 @@ const assignmentSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Not Started', 'In Progress', 'Completed'],  // Changed 'Submitted' to 'Completed'
+    enum: ['Not Started', 'In Progress', 'Completed'],
     default: 'Not Started'
+  },
+  grade: {                       // ✅ New field for grade tracking
+    type: Number,
+    default: null,
+    min: 0,                      // optional → can't be negative
+    max: 100                     // optional → out of 100
+  },
+  studyTime: {                   // ✅ New field for study time tracking
+    totalHours: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    sessions: [{
+      date: {
+        type: Date,
+        default: Date.now
+      },
+      hours: {
+        type: Number,
+        required: true,
+        min: 0
+      },
+      notes: {
+        type: String,
+        default: ''
+      }
+    }]
   }
 }, {
   timestamps: true
